@@ -104,6 +104,9 @@ void loop()
 
  inputListener();
 
+ 
+ 
+ //If the boolean is true the police siren will start
  if(playSiren){
 
    cSiren();
@@ -117,14 +120,8 @@ void loop()
 void GoForward(){
 
     ChannelAFullSpeed(true);
-    ChannelBFullSpeed(true);
-
-
-
-
-
-
-
+    ChannelBFullSpeed(true); 
+    cGreen();
 
 }
 
@@ -132,6 +129,7 @@ void GoBackward(){
 
     ChannelAFullSpeed(false);
     ChannelBFullSpeed(false);
+    cRed();
 
 }
 
@@ -142,8 +140,7 @@ void TurnLeft(){
 
     GoForward();
     analogWrite(spinLeft,0);
-
-
+    cLightBlue();
 
 }
 
@@ -151,8 +148,7 @@ void TurnRight(){
 
     GoForward();
     analogWrite(spinRight,0);
-
-
+    cLightGreen();
 
 }
 
@@ -254,7 +250,6 @@ void inputListener() {
      switch (curr) {
        case FORWARD:
             GoForward();
-            cLightBlue();
               break;
         case STOP:
             Stop();
@@ -263,17 +258,14 @@ void inputListener() {
 
         case LEFT:
             TurnLeft();
-            cRed();
             break;
 
        case RIGHT:
             TurnRight();
-            cGreen();
             break;
 
        case BACKWARD:
            GoBackward();
-           cLightGreen();
             break;
 
        case COLORFLOW:
