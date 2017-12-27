@@ -2,6 +2,7 @@
 #include <IRremote.h>
 #include <Arduino.h>
 
+#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -85,9 +86,13 @@ const int MANUAL = 0xE0E020DF;
 
 void setup() {
 
-display.begin(SSD1306_SWITCHCAPVCC,0x3C);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
+  // init done
 
-Display.display();
+  // Show image buffer on the display hardware.
+  // Since the buffer is intialized with an Adafruit splashscreen
+  // internally, this will display the splashscreen.
+
 
 
 
@@ -142,9 +147,18 @@ void loop()
 
 {
 
+  display.display();
+  delay(2000);
+
+esp8266.drawString("dfdfdf");
+
+
+
 
 
  //testRemote();
+
+ /*
 
 inputListener();
 
@@ -177,7 +191,7 @@ else{autoPilot();}
 
    cSiren();
  }
-
+*/
 
 
 
