@@ -2,8 +2,8 @@
 #include <IRremote.h>
 #include <Arduino.h>
 
-#include <SPI.h>
-#include <Wire.h>
+
+
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -89,7 +89,7 @@ const int MANUAL = 0xE0E020DF;
 
 void setup() {
 
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
+  display.begin(SSD1306_SWITCHCAPVCC,0x3D);  // initialize with the I2C addr 0x3D (for the 128x64)
   // init done
 
 
