@@ -2,6 +2,17 @@
 #include <IRremote.h>
 #include <Arduino.h>
 
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+
+// display object
+#define OLED_RESET 4
+Adafruit_SSD1306 display(OLED_RESET);
+
+
+
 // Auto Pilot var
 
 boolean isAutoPilot = false;
@@ -10,8 +21,8 @@ int ran;
 
 // Distance messure - Ultra sound
 
-int echo = A5;
-int trig =A4;
+int echo = A3;
+int trig =A2;
 
 
 // honk pin
@@ -74,6 +85,13 @@ const int MANUAL = 0xE0E020DF;
 
 void setup() {
 
+display.begin(SSD1306_SWITCHCAPVCC,0x3C);
+
+Display.display();
+
+
+
+
  randomSeed(analogRead(0)); // generate random number
 
 // Distance messure Setup
@@ -123,6 +141,8 @@ pinMode(echo, INPUT); // Sets the echoPin as an Input
 void loop()
 
 {
+
+
 
  //testRemote();
 
