@@ -8,9 +8,12 @@
 #include <Adafruit_SSD1306.h>
 
 
+
 // display object
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
+
+
 
 
 
@@ -89,6 +92,8 @@ void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
   // init done
 
+
+
   // Show image buffer on the display hardware.
   // Since the buffer is intialized with an Adafruit splashscreen
   // internally, this will display the splashscreen.
@@ -147,10 +152,14 @@ void loop()
 
 {
 
-  display.display();
-  delay(2000);
 
-esp8266.drawString("dfdfdf");
+
+
+
+display.display();
+
+
+delay(2000);
 
 
 
