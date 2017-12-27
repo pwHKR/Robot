@@ -2,6 +2,17 @@
 #include <IRremote.h>
 #include <Arduino.h>
 
+// Auto Pilot var
+
+boolean isAutoPilot = false;
+
+int ran;
+
+// Distance messure - Ultra sound
+
+int echo = A5;
+int trig =A4;
+
 
 // honk pin
 
@@ -17,6 +28,7 @@ const int redLed = 5;
 
 
 
+
 // Motor var
 const int leftMotor = 12; // Channel A
 const int leftBreak = 9; // Channel A break
@@ -29,7 +41,9 @@ const int rightBreak = 8; // Channel B break
 
 
 
-
+ // Distance messure var
+ long duration;
+ int distance;
 
 
 
@@ -51,11 +65,21 @@ const int STOP= 0xE0E016E9;
 const int COLORFLOW =0xE0E09E61;
 const int LEDPOWER = 0xE0E040BF;
 const int HONK = 0xE0E0F807;
-
+const int SPEED_UP= 0xE0E0E01F; // currently not used - vol+ on remote
+const int SPEED_DOWN= 0xE0E0D02F; // currently not used vol- on remote
+const int AUTOPILOT = 0xDAEA83EC;
+const int MANUAL = 0xE0E020DF;
 
 
 
 void setup() {
+
+ randomSeed(analogRead(0)); // generate random number
+
+// Distance messure Setup
+
+pinMode(trig, OUTPUT); // Sets the trigPin as an Output
+pinMode(echo, INPUT); // Sets the echoPin as an Input
 
 
 
@@ -102,8 +126,33 @@ void loop()
 
  //testRemote();
 
- inputListener();
+inputListener();
 
+if(isAutoPilot == false){
+
+
+ CalcDistance();
+
+
+
+ distanceCheck();
+}
+
+else{autoPilot();}
+
+
+
+
+
+
+
+
+
+
+
+
+
+ //If the boolean is true the police siren will start
  if(playSiren){
 
    cSiren();
@@ -118,13 +167,7 @@ void GoForward(){
 
     ChannelAFullSpeed(true);
     ChannelBFullSpeed(true);
-
-
-
-
-
-
-
+    cGreen();
 
 }
 
@@ -132,6 +175,7 @@ void GoBackward(){
 
     ChannelAFullSpeed(false);
     ChannelBFullSpeed(false);
+    cRed();
 
 }
 
@@ -142,8 +186,7 @@ void TurnLeft(){
 
     GoForward();
     analogWrite(spinLeft,0);
-
-
+    cLightBlue();
 
 }
 
@@ -151,8 +194,7 @@ void TurnRight(){
 
     GoForward();
     analogWrite(spinRight,0);
-
-
+    cLightGreen();
 
 }
 
@@ -184,7 +226,18 @@ digitalWrite(honk,LOW);
 
 
 
+void distanceCheck(){
 
+  if(distance <= 5){
+
+  //  GoBackward();
+
+    delay(200);
+    Stop();
+  }
+
+
+}
 
 
 
@@ -218,6 +271,41 @@ void ChannelBFullSpeed(boolean direction){
 
 }
 
+
+void autoPilot(){
+
+
+
+  ran = random(1, 2);
+
+GoForward();
+
+CalcDistance();
+
+if(distance <4){
+
+  GoBackward();
+  delay(500);
+  GoForward();
+}
+
+
+  if (distance <= 10){
+
+      if(ran == 1){
+        TurnLeft();
+        delay(1000);
+      }
+
+      if(ran == 2){
+        TurnRight();
+          delay(1000);
+
+      }
+
+
+  }
+}
 
 
 
@@ -254,7 +342,6 @@ void inputListener() {
      switch (curr) {
        case FORWARD:
             GoForward();
-            cLightBlue();
               break;
         case STOP:
             Stop();
@@ -263,17 +350,14 @@ void inputListener() {
 
         case LEFT:
             TurnLeft();
-            cRed();
             break;
 
        case RIGHT:
             TurnRight();
-            cGreen();
             break;
 
        case BACKWARD:
            GoBackward();
-           cLightGreen();
             break;
 
        case COLORFLOW:
@@ -288,6 +372,15 @@ void inputListener() {
             doHonk();
             break;
 
+       case AUTOPILOT:
+            SetAutoPilot();
+            break;
+
+       case MANUAL:
+            QuitAutoPilot();
+            break;
+
+
      }
 
 
@@ -297,6 +390,9 @@ void inputListener() {
           }
 
  }
+
+
+
 
 
  void cBlue(){
@@ -410,6 +506,38 @@ delay(400);
 
 
 cLightGreen();
-delay(200);;
+delay(200);}
 
+void CalcDistance(){
+
+// This code is taken from the web. Look in to this more!
+
+  // Clears the trigPin
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echo, HIGH);
+  // Calculating the distance
+  distance= duration*0.034/2;
+  // Prints the distance on the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.println(distance);
+
+}
+
+void QuitAutoPilot(){
+
+  isAutoPilot = false;
+  Stop();
+}
+
+void SetAutoPilot(){
+
+  isAutoPilot = true;
+  Stop();
 }
