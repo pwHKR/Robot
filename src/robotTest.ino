@@ -156,8 +156,9 @@ void loop()
 
 
 
-display.display();
 
+
+display.display();
 
 delay(2000);
 
