@@ -1,12 +1,17 @@
-#include <IRremoteInt.h>
-#include <IRremote.h>
+
 #include <Arduino.h>
+#include <IRremote.h>
+#include <IRremoteInt.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <SPI.h>
+#include <Wire.h>
 
 
 
-// display object
+
+// Display defention and objects
+
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
 
@@ -22,13 +27,13 @@ int ran;
 
 // Distance messure - Ultra sound
 
-int echo = A3;
-int trig =A2;
+const int echo = A3;
+const int trig =A2;
 
 
 // honk pin
 
-const int honk = 4;
+  int honk = 2;
 
 
 // led color pins
@@ -61,7 +66,7 @@ const int rightBreak = 8; // Channel B break
 
 // IR var
 
-int RECV_PIN = 10;
+ int RECV_PIN = 10;
 IRrecv irrecv(RECV_PIN); //
 decode_results results; //
 
@@ -84,16 +89,42 @@ const int MANUAL = 0xE0E020DF;
 
 
 
+#define XPOS 0
+#define YPOS 1
+
+
+
+
+
+
+
+char incomingByte;
+int lines = 0;
+int chars = 0;
+
+
+
+
+
+
 void setup() {
 
-  display.begin(SSD1306_SWITCHCAPVCC,0x3D);  // initialize with the I2C addr 0x3D (for the 128x64)
+
+
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
   // init done
 
 
 
-  // Show image buffer on the display hardware.
-  // Since the buffer is intialized with an Adafruit splashscreen
-  // internally, this will display the splashscreen.
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0,0);
+
+  display.display();
+
+
+
+
 
 
 
@@ -118,10 +149,9 @@ pinMode(echo, INPUT); // Sets the echoPin as an Input
   Serial.begin(9600);
   irrecv.enableIRIn(); // Start the receiver // comment here
 
-
   // Horn Setup
 
-  pinMode(A0,OUTPUT);
+//  pinMode(A0,OUTPUT);
 
 
 
@@ -143,6 +173,9 @@ pinMode(echo, INPUT); // Sets the echoPin as an Input
     pinMode(blueLed,OUTPUT);
 
 
+
+
+
 }
 
 void loop()
@@ -150,14 +183,8 @@ void loop()
 {
 
 
+//testS();
 
-
-
-
-
-display.display();
-
-delay(2000);
 
 
 
@@ -165,9 +192,12 @@ delay(2000);
 
  //testRemote();
 
- /*
+
 
 inputListener();
+
+
+
 
 if(isAutoPilot == false){
 
@@ -198,7 +228,8 @@ else{autoPilot();}
 
    cSiren();
  }
-*/
+
+
 
 
 
@@ -210,6 +241,8 @@ void GoForward(){
     ChannelBFullSpeed(true);
     cGreen();
 
+    SetMessage("Drive");
+
 }
 
 void GoBackward(){
@@ -217,6 +250,8 @@ void GoBackward(){
     ChannelAFullSpeed(false);
     ChannelBFullSpeed(false);
     cRed();
+
+    SetMessage("Reverse");
 
 }
 
@@ -229,6 +264,9 @@ void TurnLeft(){
     analogWrite(spinLeft,0);
     cLightBlue();
 
+    SetMessage("Left");
+
+
 }
 
 void TurnRight(){
@@ -236,7 +274,7 @@ void TurnRight(){
     GoForward();
     analogWrite(spinRight,0);
     cLightGreen();
-
+SetMessage("Right");
 }
 
 void Stop(){
@@ -244,7 +282,7 @@ void Stop(){
 
 analogWrite(spinLeft,0);
 analogWrite(spinRight,0);
-
+SetMessage("Stop");
 }
 
 void doHonk(){
@@ -275,6 +313,7 @@ void distanceCheck(){
 
     delay(200);
     Stop();
+    SetSmallMessage("Obstacle is close, cant continue in this direction");
   }
 
 
@@ -349,7 +388,29 @@ if(distance <4){
 }
 
 
+void testS(){
 
+  display.print("Turning Left");
+  display.display();
+  delay(3000);
+
+
+
+
+display.clearDisplay();
+     display.setTextSize(1);
+     display.setTextColor(WHITE);
+     display.setCursor(0,0);
+
+       //display.print("Turning Right",false);
+       display.display();
+       delay(3000);
+
+       display.clearDisplay();
+            display.setTextSize(1);
+            display.setTextColor(WHITE);
+            display.setCursor(0,0);
+}
 
 
 void testRemote(){
@@ -524,13 +585,15 @@ void cSiren(){
 
   digitalWrite(blueLed,HIGH);
   digitalWrite(redLed,LOW);
-  digitalWrite(4,HIGH);
+  digitalWrite(2,HIGH);
   delay(75);
   digitalWrite(blueLed,LOW);
   digitalWrite(redLed,HIGH);
   delay(75);
-  digitalWrite(4,LOW);
+  digitalWrite(2,LOW);
   delay(75);
+
+SetMessage("Stop Police!");
 
 
 }
@@ -581,4 +644,38 @@ void SetAutoPilot(){
 
   isAutoPilot = true;
   Stop();
+}
+
+void SetMessage(String message){
+
+
+  display.clearDisplay();
+
+
+       display.setTextSize(2);
+
+
+       display.setTextColor(WHITE);
+       display.setCursor(0,0);
+
+         display.print(message);
+         display.display();
+}
+
+
+void SetSmallMessage(String message){
+
+
+  display.clearDisplay();
+
+
+       display.setTextSize(1);
+
+
+
+       display.setTextColor(WHITE);
+       display.setCursor(0,0);
+
+         display.print(message);
+         display.display();
 }
