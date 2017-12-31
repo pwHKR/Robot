@@ -193,6 +193,13 @@ void loop()
  //testRemote();
 
 
+<<<<<<< HEAD
+=======
+ 
+ 
+ //If the boolean is true the police siren will start
+ if(playSiren){
+>>>>>>> origin/master
 
 inputListener();
 
@@ -213,6 +220,7 @@ else{autoPilot();}
 
 
 
+<<<<<<< HEAD
 
 
 
@@ -220,6 +228,11 @@ else{autoPilot();}
 
 
 
+=======
+    ChannelAFullSpeed(true);
+    ChannelBFullSpeed(true); 
+    cGreen();
+>>>>>>> origin/master
 
 
 
@@ -250,8 +263,11 @@ void GoBackward(){
     ChannelAFullSpeed(false);
     ChannelBFullSpeed(false);
     cRed();
+<<<<<<< HEAD
 
     SetMessage("Reverse");
+=======
+>>>>>>> origin/master
 
 }
 
@@ -263,9 +279,12 @@ void TurnLeft(){
     GoForward();
     analogWrite(spinLeft,0);
     cLightBlue();
+<<<<<<< HEAD
 
     SetMessage("Left");
 
+=======
+>>>>>>> origin/master
 
 }
 
@@ -274,7 +293,11 @@ void TurnRight(){
     GoForward();
     analogWrite(spinRight,0);
     cLightGreen();
+<<<<<<< HEAD
 SetMessage("Right");
+=======
+
+>>>>>>> origin/master
 }
 
 void Stop(){
