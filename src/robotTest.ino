@@ -6,6 +6,8 @@
 #include <Adafruit_SSD1306.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 
 
@@ -15,6 +17,15 @@
 #define OLED_RESET 4
 Adafruit_SSD1306 display(OLED_RESET);
 
+// temp
+
+#define ONE_WIRE_BUS 2
+
+// Setup a oneWire instance to communicate with any OneWire devices
+// (not just Maxim/Dallas temperature ICs)
+OneWire oneWire(ONE_WIRE_BUS);
+// Pass our oneWire reference to Dallas Temperature.
+DallasTemperature sensors(&oneWire);
 
 
 
@@ -33,7 +44,7 @@ const int trig =A2;
 
 // honk pin
 
-  int honk = 2;
+  int honk = 8;
 
 
 // led color pins
@@ -82,8 +93,8 @@ const int STOP= 0xE0E016E9;
 const int COLORFLOW =0xE0E09E61;
 const int LEDPOWER = 0xE0E040BF;
 const int HONK = 0xE0E0F807;
-const int SPEED_UP= 0xE0E0E01F; // currently not used - vol+ on remote
-const int SPEED_DOWN= 0xE0E0D02F; // currently not used vol- on remote
+const int CURRTEMP= 0xE0E0E01F; // currently not used - vol+ on remote
+const int LOOPTEMP= 0xE0E0D02F; // currently not used vol- on remote
 const int AUTOPILOT = 0xDAEA83EC;
 const int MANUAL = 0xE0E020DF;
 
@@ -98,12 +109,15 @@ const int MANUAL = 0xE0E020DF;
 
 
 
+
 char incomingByte;
 int lines = 0;
 int chars = 0;
 
 
+// temp variable
 
+boolean isTempLoop = false;
 
 
 
@@ -132,6 +146,8 @@ void setup() {
 
  randomSeed(analogRead(0)); // generate random number
 
+
+
 // Distance messure Setup
 
 pinMode(trig, OUTPUT); // Sets the trigPin as an Output
@@ -159,11 +175,11 @@ pinMode(echo, INPUT); // Sets the echoPin as an Input
 
     //Setup Channel A
     pinMode(12, OUTPUT); //Initiates Motor Channel A pin
-    pinMode(9, OUTPUT); //Initiates Brake Channel A pin
+    //pinMode(9, OUTPUT); //Initiates Brake Channel A pin
 
     //Setup Channel B
     pinMode(13, OUTPUT); //Initiates Motor Channel B pin
-    pinMode(8, OUTPUT);  //Initiates Brake Channel B pin
+    //pinMode(8, OUTPUT);  //Initiates Brake Channel B pin
 
 
     // Color chaning led
@@ -172,8 +188,9 @@ pinMode(echo, INPUT); // Sets the echoPin as an Input
     pinMode(greenLed,OUTPUT);
     pinMode(blueLed,OUTPUT);
 
+//temp
 
-
+sensors.begin();
 
 
 }
@@ -181,6 +198,7 @@ pinMode(echo, INPUT); // Sets the echoPin as an Input
 void loop()
 
 {
+
 
 
 //testS();
@@ -193,13 +211,11 @@ void loop()
  //testRemote();
 
 
-<<<<<<< HEAD
-=======
- 
- 
- //If the boolean is true the police siren will start
- if(playSiren){
->>>>>>> origin/master
+
+
+
+
+
 
 inputListener();
 
@@ -220,7 +236,6 @@ else{autoPilot();}
 
 
 
-<<<<<<< HEAD
 
 
 
@@ -228,11 +243,6 @@ else{autoPilot();}
 
 
 
-=======
-    ChannelAFullSpeed(true);
-    ChannelBFullSpeed(true); 
-    cGreen();
->>>>>>> origin/master
 
 
 
@@ -242,10 +252,13 @@ else{autoPilot();}
    cSiren();
  }
 
+if(isTempLoop){
+
+  DisplayTemp();
+}
 
 
-
-
+//testTemp();
 }
 
 void GoForward(){
@@ -263,11 +276,10 @@ void GoBackward(){
     ChannelAFullSpeed(false);
     ChannelBFullSpeed(false);
     cRed();
-<<<<<<< HEAD
+
 
     SetMessage("Reverse");
-=======
->>>>>>> origin/master
+
 
 }
 
@@ -279,12 +291,11 @@ void TurnLeft(){
     GoForward();
     analogWrite(spinLeft,0);
     cLightBlue();
-<<<<<<< HEAD
+
 
     SetMessage("Left");
 
-=======
->>>>>>> origin/master
+
 
 }
 
@@ -293,11 +304,9 @@ void TurnRight(){
     GoForward();
     analogWrite(spinRight,0);
     cLightGreen();
-<<<<<<< HEAD
-SetMessage("Right");
-=======
 
->>>>>>> origin/master
+SetMessage("Right");
+
 }
 
 void Stop(){
@@ -306,6 +315,8 @@ void Stop(){
 analogWrite(spinLeft,0);
 analogWrite(spinRight,0);
 SetMessage("Stop");
+
+//  SetMessage("Gott Nytt  År :)");
 }
 
 void doHonk(){
@@ -324,9 +335,34 @@ digitalWrite(honk,LOW);
 
 }
 
+void DisplayTemp(){
+
+  String currTemp;
+
+
+  sensors.requestTemperatures(); // Send the command to get temperatures
+  currTemp = sensors.getTempCByIndex(0);
+
+  SetMessage(currTemp + "c");
 
 
 
+}
+
+
+void testTemp(){
+
+// call sensors.requestTemperatures() to issue a global temperature
+// request to all devices on the bus
+Serial.print("Requesting temperatures...");
+sensors.requestTemperatures(); // Send the command to get temperatures
+Serial.println("DONE");
+Serial.print("Temperature for Device 1 is: ");
+Serial.print(sensors.getTempCByIndex(0));
+// Why "byIndex"?
+// You can have more than one IC on the same bus.
+// 0 refers to the first IC on the wire
+}
 
 void distanceCheck(){
 
@@ -337,6 +373,7 @@ void distanceCheck(){
     delay(200);
     Stop();
     SetSmallMessage("Obstacle is close, cant continue in this direction");
+
   }
 
 
@@ -358,7 +395,7 @@ void ChannelAFullSpeed(boolean direction){
     else { digitalWrite(leftMotor,LOW);}
 
     //Establishes forward direction of Channel A
-    digitalWrite(leftBreak, LOW);   //Disengage the Brake for Channel A
+    //digitalWrite(leftBreak, LOW);   //Disengage the Brake for Channel A
     analogWrite(spinLeft, 255);   //Spins the motor on Channel A at full speed
 
 }
@@ -369,7 +406,7 @@ void ChannelBFullSpeed(boolean direction){
 
 
     else { digitalWrite(rightMotor,LOW);}
-    digitalWrite(rightBreak, LOW);   //Disengage the Brake for Channel A
+    //igitalWrite(rightBreak, LOW);   //Disengage the Brake for Channel A
     analogWrite(spinRight, 255);   //Spins the motor on Channel A at full speed
 
 }
@@ -388,23 +425,25 @@ CalcDistance();
 if(distance <4){
 
   GoBackward();
-  delay(500);
+  delay(2000);
   GoForward();
 }
 
 
-  if (distance <= 10){
+  if (distance <= 15){
 
       if(ran == 1){
         TurnLeft();
-        delay(1000);
+        delay(2000);
       }
 
       if(ran == 2){
         TurnRight();
-          delay(1000);
+          delay(2000);
 
       }
+
+
 
 
   }
@@ -504,6 +543,14 @@ void inputListener() {
        case MANUAL:
             QuitAutoPilot();
             break;
+      case CURRTEMP:
+                TempOnce();
+                 break;
+
+     case LOOPTEMP:
+                 DoTempLoop();
+                break;
+
 
 
      }
@@ -608,12 +655,12 @@ void cSiren(){
 
   digitalWrite(blueLed,HIGH);
   digitalWrite(redLed,LOW);
-  digitalWrite(2,HIGH);
+  digitalWrite(8,HIGH);
   delay(75);
   digitalWrite(blueLed,LOW);
   digitalWrite(redLed,HIGH);
   delay(75);
-  digitalWrite(2,LOW);
+  digitalWrite(8,LOW);
   delay(75);
 
 SetMessage("Stop Police!");
@@ -701,4 +748,22 @@ void SetSmallMessage(String message){
 
          display.print(message);
          display.display();
+       }
+
+
+void DoTempLoop(){
+
+  isTempLoop = true;
+}
+
+void QuitTempLoop(){
+
+  isTempLoop = false;
+}
+
+void TempOnce(){
+
+    QuitTempLoop();
+
+  DisplayTemp();
 }
